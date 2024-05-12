@@ -1,0 +1,31 @@
+{
+  "name": "catatan-pengeluaran-be",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node index.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "crypto": "^1.0.1",
+    "dayjs": "^1.11.11",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "jwt-decode": "^4.0.0",
+    "mongoose": "^8.3.3",
+    "node-ts": "^6.0.1",
+    "nodemon": "^3.1.0",
+    "zod": "^3.23.6"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^20.12.8",
+    "typescript": "^5.4.5"
+  }
+}
