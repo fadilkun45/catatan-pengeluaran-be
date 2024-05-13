@@ -25,3 +25,4 @@ PrivateRouters.delete('/categories/delete', CategoriesController.delete)
 PrivateRouters.post('/categories/update', CategoriesController.update)
 
 PrivateRouters.get('/transaction', FinanceControllers.getTransaction)
+PrivateRouters.get('/transaction-log', FinanceControllers.getTransactionLog)

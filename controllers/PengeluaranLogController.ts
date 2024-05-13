@@ -11,6 +11,10 @@ export class PengeluaranLog {
         savedData.user_id = jwtDecode<JwtPayload | any>(req.get("user-token")!).id
 
         try {
+
+            savedData.created_at = dayjs(savedData.created_at).format('YYYY-MM-DD')
+            savedData.time_detail = dayjs(savedData.created_at).add(1, 'day').toISOString()
+
             const postData = await PengeluaranLogModel.create(savedData)
             const result = await postData.save()
 
@@ -25,6 +29,10 @@ export class PengeluaranLog {
     static async update(req: Request, res: Response) {
 
         let savedData = req.body
+
+        savedData.created_at = dayjs(savedData.created_at).format('YYYY-MM-DD')
+        savedData.time_detail = dayjs(savedData.created_at).add(1, 'day').toISOString()
+
         savedData.user_id = jwtDecode<JwtPayload | any>(req.get("user-token")!).i
 
         try {
@@ -68,7 +76,7 @@ export class PengeluaranLog {
 
         try {
             if (params.page_size && params.page && (!params.start_date || !params.end_date)) {
-                const getPengeluaranLog = await PengeluaranLogModel.find({ 'user_id': getUser.id }).skip((parseInt(params.page) - 1) * params.page_size ).limit(parseInt(params.page_size))
+                const getPengeluaranLog = await PengeluaranLogModel.find({ 'user_id': getUser.id,}).sort({time_detail: -1}).skip((parseInt(params.page) - 1) * params.page_size ).limit(parseInt(params.page_size))
                 const getAllData = await PengeluaranLogModel.find({ 'user_id': getUser.id }).countDocuments()
                 return res.status(200).json({
                     data: getPengeluaranLog,
@@ -84,13 +92,22 @@ export class PengeluaranLog {
                     data: getPengeluaranLog 
                 })
             }
+            if (params.categories_id) {
+                const getPengeluaranLog = await PengeluaranLogModel.find({ 'categories': params.categories_id })
+                const getAllData = await PengeluaranLogModel.find({ 'categories': params.categories_id }).countDocuments()
+
+               return res.status(200).json({
+                    data: getPengeluaranLog,
+                    total_data: getAllData
+                })
+            }
             if(params.start_date || params.last_date){
 
                 const startdate = params.start_date || dayjs( new Date()).format('YYYY-MM-DD')
                 const lastdate = params.last_date || dayjs( new Date()).format('YYYY-MM-DD')
              
 
-                const getPengeluaranLog = await PengeluaranLogModel.find({ 'user_id': getUser.id, created_at: { $gte: startdate, $lte: lastdate} })
+                const getPengeluaranLog = await PengeluaranLogModel.find({ 'user_id': getUser.id, created_at: { $gte: startdate, $lte: lastdate} }).sort({time_detail: -1})
                 const getAllData = await PengeluaranLogModel.find({ 'user_id': getUser.id, created_at: { $gte: startdate, $lte: lastdate} }).countDocuments()
                 return res.status(200).json({
                     data: getPengeluaranLog,

@@ -16,8 +16,8 @@ const PengeluaranLogSchema = new mongoose.Schema<PengeluaranLogType>({
     pengeluaran_desc: { type: String},
     categories: {type: [String]},
     amount: {type: Number,  required: true},
-    time_detail: {type: Date, default: Date.now},
-    created_at: {type: String, default: dayjs().format("YYYY-MM-DD")},
+    time_detail: {type: Date, required: true},
+    created_at: {type: String, required: true},
     user_id: {type: String, required: true}
 })
 
