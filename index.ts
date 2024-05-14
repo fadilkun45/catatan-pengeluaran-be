@@ -11,9 +11,9 @@ const app = express()
 
 app.use(bodyParser.urlencoded({ extended: false}))
 app.use(bodyParser.json())
+app.use(apiAuthMiddleware)
 app.use(PublicRouter)
 app.use(PrivateRouters)
-app.use(apiAuthMiddleware)
 
 mongoose.connect(process.env.MONGODB_URL!).then(() => console.log("MongoDB is ready")).catch((err) => console.error("Failed to Connect to MongoDB:", err));
 

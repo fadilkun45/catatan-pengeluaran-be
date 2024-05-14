@@ -8,7 +8,6 @@ export const apiAuthMiddleware = (req: Request, res: Response,  next: NextFuncti
     }
 
     if(req.get("token") !== process.env.TOKEN){
-      
         res.status(403).json({
             message: "Unauthorized"
         }).end()
@@ -17,16 +16,19 @@ export const apiAuthMiddleware = (req: Request, res: Response,  next: NextFuncti
     }
   }
 
-export const apiUserAuthMiddleware = (req: Request, res: Response,  next: NextFunction) => {
+export const apiUserAuthMiddleware = async (req: Request, res: Response,  next: NextFunction) => {
     if(!req.get("user-token")){
         res.status(403).json({
             message: "token unauthorized"
         }).end()
-    }else if(jwt.verify(req.get("user-token")!, process.env.KEY_JWT_USER!)){
-            next()
     }else{
-        res.status(403).json({
-            message: "token invalid"
-        }).end()
+        try {
+            await jwt.verify(req.get("user-token")!, process.env.KEY_JWT_USER!)
+                        next()
+        } catch (error) {
+            res.status(403).json({
+                message: "token invalid"
+            }).end()
+        } 
     }
 }
