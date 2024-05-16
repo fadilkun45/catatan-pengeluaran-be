@@ -10,20 +10,18 @@ export class FinanceControllers {
         const params: any = req.query
         const getUser: any = jwtDecode(req.get("user-token")!)
 
-        const startdate = params.start_date || dayjs( new Date()).format('YYYY-MM-DD')
-        const lastdate = params.last_date || dayjs( new Date()).format('YYYY-MM-DD')
 
         try {
-            // const getData = await PengeluaranLogModel.find({ created_at: {$gte: startdate,  $lte: lastdate } })
             if(params.type === "week"){
 
-                const startOfWeek = dayjs().subtract(7, 'week').format("YYYY-MM-DD")
-                const endOfWeek = dayjs().format("YYYY-MM-DD") // End of current week
+                const startOfWeek = dayjs(params.start_date).subtract(7, 'week').format("YYYY-MM-DD")  || dayjs().subtract(7, 'week').format("YYYY-MM-DD")
+                const endOfWeek = params.last_date  || dayjs().format("YYYY-MM-DD") // End of current week
 
                 const result: any = await PengeluaranLogModel.aggregate([
                     {
                         $match: {
-                            created_at: { $gte: startOfWeek, $lte: endOfWeek } // Filter documents within the specified date range
+                            created_at: { $gte: startOfWeek, $lte: endOfWeek },
+                            user_id: getUser.id
                         }
                     },
                     {
@@ -41,23 +39,22 @@ export class FinanceControllers {
                             count: { $sum: 1 }
                         }
                     },
-                
+                    {
+                        $sort: { "_id": -1 } // Mengurutkan berdasarkan tanggal terbaru
+                      }
                 ]);
                 
                let resultData = await result.map((x: any) => {
-                    // const startDateOfYear = dayjs(`${x._id.year}-01-01`);
                     const startDateOfYear = dayjs(`${x._id.year}-01-01`).startOf('year').add(1, 'year')
 
-                    // Menambahkan minggu yang sesuai
                     const targetDate = startDateOfYear.add(x._id.week - 1, 'week');
 
                     // Mendapatkan nama bulan dan minggu
                     const monthName = targetDate.format('MMMM');
                     const weekInMonth = Math.ceil(targetDate.date() / 7);
+                    // console.log(`bulan : ${monthName} - minggu : ${weekInMonth}` )
 
-                    console.log(`bulan : ${monthName} - minggu : ${weekInMonth}` )
-
-                    return {bulan: monthName, minggu: weekInMonth, total: x.totalAmount}
+                    return {bulan: weekInMonth > 4 ? targetDate.add(1,'month').format("MMMM") : monthName, minggu:  weekInMonth > 4 ?  1 : weekInMonth, total: x.totalAmount}
                     
                 })
 
@@ -66,56 +63,48 @@ export class FinanceControllers {
                 })
 
             }
+
             if(params.type === "month"){
 
                 const startOfWeek = dayjs().subtract(1, 'month').format("YYYY-MM-DD")
                 const endOfWeek = dayjs().format("YYYY-MM-DD") // End of current week
 
-                const result: any = await PengeluaranLogModel.aggregate([
-                    {
-                        $match: {
-                            created_at: { $gte: startOfWeek, $lte: endOfWeek } // Filter documents within the specified date range
-                        }
-                    },
-                    {
-                        $project: {
-                            week: { $isoWeek: "$time_detail" },
-                            year: { $isoWeekYear: "$time_detail" },
-                            time_detail: 1,
-                            amount: 1,
-                        }
-                    },
-                    {
-                        $group: {
-                            _id: { week: "$week", year: "$year",},
-                            totalAmount: { $sum: "$amount" },
-                            count: { $sum: 1 }
-                        }
-                    },
-                
-                ]);
-                
-               let resultData =  result.map((x: any) => {
-                    const startDateOfYear = dayjs(`${x._id.year}-01-01`);
+                const monthNames = [
+                    "January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"
+                ];
 
-                    // Menambahkan minggu yang sesuai
-                    const targetDate = startDateOfYear.add(x._id.week - 1, 'week');
-                    
-                    // Mendapatkan nama bulan dan minggu
-                    const monthName = targetDate.format('MMMM');
-                    const weekInMonth = Math.ceil(targetDate.date() / 7);
-
-                    // console.log(`bulan : ${monthName} - minggu : ${weekInMonth}` )
-
-                    return {bulan: monthName, minggu: weekInMonth, total: x.totalAmount}
-                    
-                })
+                    const result = await PengeluaranLogModel.aggregate([
+                        {
+                            $group: {
+                                _id: {
+                                    year: { $year: "$time_detail" },
+                                    month: { $month: "$time_detail" }
+                                },
+                                totalAmount: { $sum: "$amount" },
+                                count: { $sum: 1 }
+                            }
+                        },
+                        {
+                            $sort: { "_id": -1 } // Mengurutkan berdasarkan tanggal terbaru
+                          },
+                        {
+                            $project: {
+                                _id: 0,
+                                bulan: "$_id.month",
+                                totalAmount: 1,
+                                nama_bulan: { $arrayElemAt: [monthNames, { $subtract: ["$_id.month", 1] }] }
+                            }
+                        }
+                    ]);
+            
 
                 res.status(200).json({
-                    data: resultData
+                    data: result
                 })
 
             }
+
         } catch (error) {
             res.status(500).send(`salah fe : ${error}`);
         }
