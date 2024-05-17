@@ -4,11 +4,12 @@ import bodyParser from "body-parser"
 import { apiAuthMiddleware } from "./middleware/middleware"
 import { PrivateRouters } from "./routes/PrivateRouters"
 import { PublicRouter } from "./routes/PublicRouters"
+import cors from 'cors'
 require("dotenv").config()
 
 const app = express()
 
-
+app.use(cors())
 app.use(bodyParser.urlencoded({ extended: false}))
 app.use(bodyParser.json())
 app.use(apiAuthMiddleware)

@@ -1,19 +1,16 @@
 import { Request, Response } from "express";
-import crypto, { Decipher } from 'crypto'
+const cryptoJS = require('crypto-js');
 import jwt from 'jsonwebtoken'
 
 export class UserController {
 
     static async login(req: Request, res:Response)  {
 
-        console.log(req.body.userToken)
-
         try {
-            const decryptToken = crypto.createDecipher('aes-256-cbc', process.env.KEY_USER!)
-            let decryptedId = decryptToken.update(req.body.userToken, 'hex', 'utf8');
-            decryptedId += decryptToken.final('utf8');
-    
-            const token = jwt.sign({ id: decryptedId }, process.env.KEY_JWT_USER!);
+            const bytes = cryptoJS.AES.decrypt(req.body.userToken,process.env.KEY_USER);
+            const originalId = bytes.toString(cryptoJS.enc.Utf8);
+                
+            const token = jwt.sign({ id: originalId }, process.env.KEY_JWT_USER!);
              
             res.status(200).json({
                 message: "token berhasil dibuat",
