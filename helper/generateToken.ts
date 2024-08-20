@@ -1,5 +1,5 @@
-import bodyParser from 'body-parser'
-import express, { Request, Response } from 'express'
+import { JwtPayload, jwtDecode } from "jwt-decode";
+import { Request, Response } from 'express'
 const cryptoJS = require('crypto-js');
 
 export class GenerateHelper {
@@ -9,4 +9,12 @@ export class GenerateHelper {
             token: encryptedId
         });
     }
+    static decryptToken(token: string){
+       let jwtsDecrypt = jwtDecode<JwtPayload | any>(token!).id
+       const bytes = cryptoJS.AES.decrypt(jwtsDecrypt,process.env.KEY_USER!);
+       const originalId = bytes.toString(cryptoJS.enc.Utf8);
+       console.log("id",originalId)
+        return originalId
+    }
 }
+

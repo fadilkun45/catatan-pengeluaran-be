@@ -2,13 +2,14 @@ import dayjs from "dayjs"
 import { jwtDecode } from "jwt-decode"
 import { Request, Response } from "express";
 import { PengeluaranLogModel } from "../models/PengeluaranLogModel";
-import isoWeek from 'dayjs/plugin/isoWeek'
+import { GenerateHelper } from "../helper/generateToken";
 
 export class FinanceControllers {
 
     static async getTransaction(req: Request, res: Response) {
         const params: any = req.query
-        const getUser: any = jwtDecode(req.get("user-token")!)
+        const getUser: any = GenerateHelper.decryptToken(req.get("user-token")!)
+
         try {
             if (params.type === "date") {
 
@@ -19,7 +20,7 @@ export class FinanceControllers {
                     {
                         $match: {
                             created_at: { $gte: start_date, $lte: end_date },
-                            user_id: getUser.id
+                            user_id: getUser
                         }
                     },
                     {
@@ -49,7 +50,7 @@ export class FinanceControllers {
                     {
                         $match: {
                             created_at: { $gte: startOfWeek, $lte: endOfWeek },
-                            user_id: getUser.id
+                            user_id: getUser
                         }
                     },
                     {
@@ -94,8 +95,6 @@ export class FinanceControllers {
 
             if (params.type === "month") {
 
-                const startOfWeek = dayjs().subtract(1, 'month').format("YYYY-MM-DD")
-                const endOfWeek = dayjs().format("YYYY-MM-DD") // End of current week
 
                 const monthNames = [
                     "January", "February", "March", "April", "May", "June",
@@ -141,20 +140,20 @@ export class FinanceControllers {
     static async getTransactionLog(req: Request, res: Response) {
         try {
             const params: any = req.query
-            const getUser: any = jwtDecode(req.get("user-token")!)
+            const getUser: any = GenerateHelper.decryptToken(req.get("user-token")!)
 
             const startdate = params.start_date || dayjs(new Date()).format('YYYY-MM-DD')
             const lastdate = params.last_date || dayjs(new Date()).format('YYYY-MM-DD')
 
             if (params?.categories) {
-                const count = await PengeluaranLogModel.find({ 'user_id': getUser.id, created_at: { $gte: startdate, $lte: lastdate }, categories: params.categories }).countDocuments()
+                const count = await PengeluaranLogModel.find({ 'user_id': getUser, created_at: { $gte: startdate, $lte: lastdate }, categories: params.categories }).countDocuments()
 
                 const result: any = await PengeluaranLogModel.aggregate([
                     {
 
                         $match: {
                             created_at: { $gte: startdate, $lt: lastdate },
-                            user_id: getUser.id,
+                            user_id: getUser,
                             categories: params.categories
                         }
                     },
@@ -177,14 +176,14 @@ export class FinanceControllers {
                 })
 
             } else {
-                const count = await PengeluaranLogModel.find({ 'user_id': getUser.id, created_at: { $gte: startdate, $lte: lastdate }}).countDocuments()
+                const count = await PengeluaranLogModel.find({ 'user_id': getUser, created_at: { $gte: startdate, $lte: lastdate }}).countDocuments()
 
                 const result: any = await PengeluaranLogModel.aggregate([
                     {
 
                         $match: {
                             created_at: { $gte: startdate, $lt: lastdate },
-                            user_id: getUser.id,
+                            user_id: getUser,
                         }
                     },
                     {

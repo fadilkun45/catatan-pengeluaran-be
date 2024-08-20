@@ -1,14 +1,14 @@
 import { Request, Response } from "express";
 import { JwtPayload, jwtDecode } from "jwt-decode";
 import { CategoriesModel } from "../models/CategoriesModel";
+import { GenerateHelper } from "../helper/generateToken";
 
 export class CategoriesController {
 
     static async create(req: Request, res: Response) {
 
         let savedData = req.body
-        savedData.user_id = jwtDecode<JwtPayload | any>(req.get("user-token")!).id
-
+        savedData.user_id = GenerateHelper.decryptToken(req.get("user-token")!)
 
         try {
             const postData = await CategoriesModel.create(savedData)
@@ -29,7 +29,7 @@ export class CategoriesController {
     static async update(req: Request, res: Response) {
 
         let savedData = req.body
-        savedData.user_id = jwtDecode<JwtPayload | any>(req.get("user-token")!).id
+                savedData.user_id = GenerateHelper.decryptToken(req.get("user-token")!)
 
 
         try {
@@ -69,12 +69,12 @@ export class CategoriesController {
 
     static async get(req: Request, res: Response) {
         const params: any = req.query
-        const getUser: any = jwtDecode(req.get("user-token")!)
+        const getUser: any = GenerateHelper.decryptToken(req.get("user-token")!)
 
         try {
             if (params.page_size && params.page) {
-                const getCategories = await CategoriesModel.find({ 'user_id': getUser.id }).skip((parseInt(params.page) - 1) * params.page_size).limit(parseInt(params.page_size))
-                const getAllData = await CategoriesModel.find({ 'user_id': getUser.id }).countDocuments()
+                const getCategories = await CategoriesModel.find({ 'user_id': getUser }).skip((parseInt(params.page) - 1) * params.page_size).limit(parseInt(params.page_size))
+                const getAllData = await CategoriesModel.find({ 'user_id': getUser }).countDocuments()
                 return res.status(200).json({
                     data: getCategories,
                     page: params.page,
@@ -90,7 +90,7 @@ export class CategoriesController {
                 })
             }
 
-            const getCategories = await CategoriesModel.find({ 'user_id': getUser.id })
+            const getCategories = await CategoriesModel.find({ 'user_id': getUser })
             return res.status(200).json({
                 data: getCategories
             })

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { PengeluaranLogModel } from "../models/PengeluaranLogModel";
 import { JwtPayload, jwtDecode } from "jwt-decode";
 import dayjs from "dayjs";
+import { GenerateHelper } from "../helper/generateToken";
 
 export class PengeluaranLog {
 
@@ -9,8 +10,7 @@ export class PengeluaranLog {
 
         let savedData = req.body
 
-        console.log(req.get("user-token"))
-        savedData.user_id = jwtDecode<JwtPayload | any>(req.get("user-token")!).id
+     savedData.user_id = GenerateHelper.decryptToken(req.get("user-token")!)
         console.log(jwtDecode<JwtPayload | any>(req.get("user-token")!))
 
         try {
@@ -110,8 +110,8 @@ export class PengeluaranLog {
                 const lastdate = params.last_date || dayjs( new Date()).format('YYYY-MM-DD')
              
 
-                const getPengeluaranLog = await PengeluaranLogModel.find({ 'user_id': getUser.id, created_at: { $gte: startdate, $lte: lastdate} }).sort({time_detail: -1})
-                const getAllData = await PengeluaranLogModel.find({ 'user_id': getUser.id, created_at: { $gte: startdate, $lte: lastdate} }).countDocuments()
+                const getPengeluaranLog = await PengeluaranLogModel.find({ 'user_id': getUser, created_at: { $gte: startdate, $lte: lastdate} }).sort({time_detail: -1})
+                const getAllData = await PengeluaranLogModel.find({ 'user_id': getUser, created_at: { $gte: startdate, $lte: lastdate} }).countDocuments()
                 return res.status(200).json({
                     data: getPengeluaranLog,
                     page: params.page,

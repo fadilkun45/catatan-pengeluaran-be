@@ -16,6 +16,8 @@ app.use(apiAuthMiddleware)
 app.use(PublicRouter)
 app.use(PrivateRouters)
 
+console.log(process.env.MONGODB_URL!)
+
 mongoose.connect(process.env.MONGODB_URL!).then(() => console.log("MongoDB is ready")).catch((err) => console.error("Failed to Connect to MongoDB:", err));
 
 app.listen(process.env.PORT || 3400, () => {

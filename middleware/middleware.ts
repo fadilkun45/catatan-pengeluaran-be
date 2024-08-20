@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express"
 import jwt from "jsonwebtoken"
+import { GenerateHelper } from "../helper/generateToken"
 
 export const apiAuthMiddleware = (req: Request, res: Response,  next: NextFunction) => {
     console.log('Request Url:',req.url,  )
@@ -16,6 +17,7 @@ export const apiAuthMiddleware = (req: Request, res: Response,  next: NextFuncti
     }
   }
 
+
 export const apiUserAuthMiddleware = async (req: Request, res: Response,  next: NextFunction) => {
     if(!req.get("user-token")){
         res.status(403).json({
@@ -24,7 +26,13 @@ export const apiUserAuthMiddleware = async (req: Request, res: Response,  next: 
     }else{
         try {
             await jwt.verify(req.get("user-token")!, process.env.KEY_JWT_USER!)
-                        next()
+            if(GenerateHelper.decryptToken(req.get("user-token")!)){
+                next()
+            }else{
+                res.status(403).json({
+                    message: "token invalid"
+                }).end()
+            }
         } catch (error) {
             res.status(403).json({
                 message: "token invalid"
