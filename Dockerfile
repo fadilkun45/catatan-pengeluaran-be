@@ -4,15 +4,14 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install 
+RUN npm i --save-dev @types/node
 RUN npm install -g ts-node
-
 
 COPY . .
 
 ENV PORT=3400
 ENV TOKEN=kewlhrweljbfwehg04rjkfwqedqwec
-ENV MONGODB_URL=mongodb://localhost:27017/pengeluaranku
+ENV MONGODB_URL=mongodb://db:27017/pengeluaranku
 ENV KEY_USER=mwekndnsfqw3m21ncx2312xnweoq34len21
 ENV KEY_JWT_USER=fknelhrfjwfdsfrrwqerdfsfweresfcdxsferstfertfgerfdfwert
 
