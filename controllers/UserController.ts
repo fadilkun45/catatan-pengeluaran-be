@@ -7,8 +7,10 @@ export class UserController {
     static async login(req: Request, res:Response)  {
 
         try {
-            const bytes = cryptoJS.AES.decrypt(req.body.userToken,process.env.KEY_USER);
+            const bytes = cryptoJS.AES.decrypt(req.body.userToken,process.env.KEY_USER!);
             const originalId = bytes.toString(cryptoJS.enc.Utf8);
+            console.log("ORIGINAL ID",req.body.userToken)
+            
                 
             const token = jwt.sign({ id: originalId }, process.env.KEY_JWT_USER!);
              
@@ -17,7 +19,7 @@ export class UserController {
                 userToken: token 
             })
         } catch (error) {
-            res.status(500).json({
+            res.status(400).json({
                 message: "token tidak valid",
             })
         }

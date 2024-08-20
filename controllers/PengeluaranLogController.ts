@@ -8,7 +8,10 @@ export class PengeluaranLog {
     static async create(req: Request, res: Response) {
 
         let savedData = req.body
+
+        console.log(req.get("user-token"))
         savedData.user_id = jwtDecode<JwtPayload | any>(req.get("user-token")!).id
+        console.log(jwtDecode<JwtPayload | any>(req.get("user-token")!))
 
         try {
 

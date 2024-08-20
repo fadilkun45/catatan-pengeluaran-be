@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken"
 export const apiAuthMiddleware = (req: Request, res: Response,  next: NextFunction) => {
     console.log('Request Url:',req.url,  )
     if(req.method?.toLowerCase() === "post"){
-        console.log('Request payload', req.body)
+        // console.log('Request payload', req.body)
     }
 
     if(req.get("token") !== process.env.TOKEN){

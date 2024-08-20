@@ -1,14 +1,12 @@
 import bodyParser from 'body-parser'
 import express, { Request, Response } from 'express'
-import crypto from 'crypto'
+const cryptoJS = require('crypto-js');
 
 export class GenerateHelper {
     static create(req: Request, res: Response){
-        const cipher = crypto.createCipher('aes-256-cbc', process.env.KEY_USER!);
-        let encryptedId = cipher.update(req.body.id.toString(), 'utf8', 'hex');
-        encryptedId += cipher.final('hex');
+        const encryptedId = cryptoJS.AES.encrypt(req.body.id.toString(), process.env.KEY_USER!).toString();
         res.status(200).json({
             token: encryptedId
-        })
+        });
     }
 }
